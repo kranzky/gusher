@@ -8,7 +8,7 @@
 	public class Score extends Entity
 	{
 		private var message:Text;
-		private var age:int = 30;
+		private var age:int = 60;
 		public function Score( x:int = 0, y:int = 0, score:int = 0 ) 
 		{
 			super( x, y );
@@ -25,7 +25,7 @@
 		}
 		override public function render():void
 		{
-			message.render( new Point( x - 0.5 * message.width, y - 30 + age ), new Point() );
+			message.render( new Point( x - 0.5 * message.width, y - 60 + age ), new Point() );
 		}
 	}
 }

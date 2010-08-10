@@ -301,7 +301,7 @@
 				old1 = drop1;
 				old2 = drop2;
 				newdrop = new OilDrop( x, y, s, drop1.colour );
-				newdrop.score = drop1.score * 2 + drop2.score * 2 + 1;
+				newdrop.score = ( drop1.score + 1 ) * ( drop2.score + 1 );
 				return false;
 			}
 			else
