@@ -18,7 +18,7 @@
 		public function Tomato( x:int = 0, y:int = 0 ) 
 		{
 			tomato = new Image( TOMATO );
-			tomato.scale = 0.5;
+			tomato.scale = 0.7;
 			width = tomato.scale * tomato.width * 0.72;
 			height = tomato.scale * tomato.height * 0.72;
 			setHitbox( width, height, width * 0.5, height * 0.5 );
@@ -26,7 +26,7 @@
 			tomato.smooth = true;
 			super( x, y, tomato );
 			var physics_world:PhysicsWorld = FP.world as PhysicsWorld;
-			body = PhysicsHelper.CreateCircle( physics_world.world, x, y, 90 * tomato.scale, b2Body.b2_dynamicBody, 0.5, 8, 0.0 );
+			body = PhysicsHelper.CreateCircle( physics_world.world, x, y, 60 * tomato.scale, b2Body.b2_dynamicBody, 0.5, 8, 0.0 );
 			body.SetAngularVelocity( 2 * Math.random() - 2 * Math.random() );
 			step();
 			visible = true;

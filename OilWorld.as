@@ -21,11 +21,14 @@
 		private const BACKGROUND:Class;
 		[Embed(source = 'data/foreground.png')]
 		private const FOREGROUND:Class;
+		[Embed(source = 'data/water1.png')]
+		private const SOUP:Class;
 		[Embed(source = 'data/selected.png')]
 		private const SELECTED:Class;
 		private var selected:Image;
 		private var background:Entity;
 		private var foreground:Entity;
+		private var soup:Entity;
 		public var water:b2Controller;
 		private var total:int = 1;
 		private var num:int = 0;
@@ -54,15 +57,17 @@
 			bc.angularDrag = 2.0;
 			world.AddController( water );
 			
-			var pot:Ground = new Ground( 100, 440, 400 );
+			var pot:Ground = new Ground( 90, 450, 410 );
 			pot.body.SetUserData("pot");
 			add( pot );
 			
 			add( new Ground( 0, 532, 800 ) );
-			add( new Wall( 90, 140, 400 ) );
+			add( new Wall( 80, 140, 400 ) );
 			add( new Wall( 500, 140, 400 ) );
 			var fluid:Image = new Image( FOREGROUND );
 			background = new Scenery( new Image( BACKGROUND ), 0, 0 );
+			soup = new Scenery( new Image( SOUP ), 86, 170 );
+			( soup.graphic as Image ).alpha = 0.5;
 			foreground = new Scenery( fluid, 0, 0 );
 			
 			selected = new Image( SELECTED );
@@ -99,6 +104,7 @@
 				select1.render();
 			}
 			joinlist.forEach( drawLine );
+			soup.render();
 			foreground.render();
 			if ( Input.mouseDown && select1 != null && select2 == null )
 			{
@@ -168,9 +174,10 @@
 					{
 						var tomato:Tomato = new Tomato( 350 * Math.random() + 125, -80 );
 						add( tomato );
+						// todo: change soup level
 					}
 				}
-				var drop:OilDrop = new OilDrop( 350 * Math.random() + 125, 450,
+				var drop:OilDrop = new OilDrop( 360 * Math.random() + 115, 480,
 												0.1 + 0.05 * Math.random() - 0.05 * Math.random(),
 												Math.round( Math.random() * 2 ) );
 				add( drop );
