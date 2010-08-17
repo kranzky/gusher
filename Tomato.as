@@ -1,5 +1,6 @@
 ﻿package  
 {
+	import Box2D.Dynamics.Controllers.b2BuoyancyController;
 	import glue.PhysicsEntity;
 	import net.flashpunk.graphics.Image;
 	import glue.PhysicsWorld;
@@ -14,6 +15,7 @@
 		private const TOMATO:Class;
 		private var tomato:Image;
 		private var submerged:Boolean = false;
+		private var ingredient:Boolean = false;
 		
 		public function Tomato( x:int = 0, y:int = 0 ) 
 		{
@@ -40,22 +42,29 @@
 				var pos:b2Vec2 = body.GetPosition();
 				x = pos.x * 30;
 				y = pos.y * 30;
-				tomato.angle = -body.GetAngle() * (180 / Math.PI);
+				tomato.angle = -body.GetAngle() * ( 180 / Math.PI );
 			}
 			
-			if ( ! submerged && y > 160 && x > 100 && x < 500 )
+			if ( ! submerged && ( y + 0.5 * height ) > ( oil_world.soup.y - 10 ) && x > 100 && x < 500 )
 			{
 				oil_world.water.AddBody( body );
 				submerged = true;
 			}
 			
-			if ( submerged && y < 150 )
+			if ( ! ingredient && y > oil_world.soup.y )
+			{
+				ingredient = true;
+				oil_world.soup.y -= 30;
+				( oil_world.water as b2BuoyancyController ).offset += 1;
+			}
+			
+			if ( submerged && ( ( y + 0.5 * height ) < ( oil_world.soup.y - 20 ) || x < 100 || x > 500 ) )
 			{
 				oil_world.water.RemoveBody( body );
 				submerged = false;
 			}
 			
-			if ( y < -100 || y > 600 || x < 0 || x > 800 )
+			if ( y < -100 || y > 600 || x < -100 || x > 900 )
 			{
 				oil_world.world.DestroyBody(body);
 				FP.world.remove( this );

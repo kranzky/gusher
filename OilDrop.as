@@ -10,6 +10,7 @@
 	import Box2D.Common.Math.b2Vec2;
 	import net.flashpunk.FP;
 	import flash.geom.Point;
+	import net.flashpunk.utils.Draw;
 	
 	public class OilDrop extends PhysicsEntity
 	{		
@@ -28,6 +29,8 @@
 		public var colour:int = 0;
 		public var scale:Number = 1.0;
 		public var hover:Boolean = false;
+		public var select:Boolean = false;
+		public var joined:Boolean = false;
 		public var score:int = 0;
 
 		public function OilDrop( x:int = 0, y:int = 0, scale:Number = 0.1, colour:Number = 0 ) 
@@ -65,6 +68,26 @@
 			step();
 			visible = true;
 		}
+		override public function render():void
+		{
+			if ( joined )
+			{
+				Draw.circle( x, y, 157 * scale + 3, 0xFFFF0000, 0.8 );
+			}
+			else if ( select )
+			{
+				Draw.circle( x, y, 157 * scale + 3, 0xFFFF0000, 0.5 );
+			}
+			if ( hover || select || joined )
+			{
+				Draw.circle( x, y, 157 * scale, 0xFFFFFFFF, 1.0 );
+			}
+			super.render();
+			if ( hover )
+			{
+				Draw.circle( x, y, 157 * scale, 0xFFFFFFFF, 0.3 );
+			}
+		}
 		override public function step():void
 		{
 			var oil_world:OilWorld = FP.world as OilWorld;
@@ -81,7 +104,7 @@
 				age += 1;
 			}
 			
-			if ( ! submerged && ( y +0.5 * height ) > 160 && x > 100 && x < 500 )
+			if ( ! submerged && ( y + 0.5 * height ) > ( oil_world.soup.y - 10 ) && x > 100 && x < 500 )
 			{
 				if ( body != null )
 				{
@@ -90,7 +113,7 @@
 				submerged = true;
 			}
 			
-			if ( submerged && ( y + 0.5 * height ) < 150 )
+			if ( submerged && ( ( y + 0.5 * height ) < ( oil_world.soup.y - 20 ) || x < 100 || x > 500 ) )
 			{
 				if ( body != null )
 				{
@@ -104,7 +127,7 @@
 				oil_world.unselect( this );
 				if ( body != null )
 				{
-					oil_world.world.DestroyBody(body);
+					oil_world.world.DestroyBody( body );
 				}
 				FP.world.remove( this );
 			}
@@ -128,12 +151,7 @@
 			
 			if ( hover )
 			{
-				( this.graphic as Image ).blend = BlendMode.ADD;
 				age = 0;
-			}
-			else
-			{
-				( this.graphic as Image ).blend = null;
 			}
 			
 			hover = false;

@@ -5,6 +5,7 @@
 	import glue.PhysicsEntity;
 	import net.flashpunk.Entity;
 	import net.flashpunk.FP;
+	import net.flashpunk.graphics.Text;
 	import net.flashpunk.Tween;
 	import net.flashpunk.tweens.misc.Alarm;
 	import net.flashpunk.graphics.Image;
@@ -23,15 +24,10 @@
 		private const FOREGROUND:Class;
 		[Embed(source = 'data/water1.png')]
 		private const SOUP:Class;
-		[Embed(source = 'data/selected.png')]
-		private const SELECTED:Class;
-		private var selected:Image;
 		private var background:Entity;
 		private var foreground:Entity;
-		private var soup:Entity;
+		public var soup:Entity;
 		public var water:b2Controller;
-		private var total:int = 1;
-		private var num:int = 0;
 		private var next:Number = 2.0;
 		private var normal:Number = 1.0 / 30;
 		private var slow:Number = 1.0 / 150;
@@ -43,15 +39,23 @@
 		public var old1:OilDrop = null;
 		public var old2:OilDrop = null;
 		public var newdrop:OilDrop = null;
+		private var timer:Number = 180.0;
+		private var drop_timer:Number = 0.0;
+		private var timer_message:Text;
+		private var score:int = 0;
+		private var score_message:Text;
 		
 		override public function begin():void
 		{		
 			//debug_draw();
 			
+			timer_message = new Text( "TIMER: 180" );
+			score_message = new Text( "SCORE: 999999" );
+			
 			var bc:b2BuoyancyController = new b2BuoyancyController();
 			water = bc;
 			bc.normal.Set( 0, -1 );
-			bc.offset = -6.5;
+			bc.offset = -10.5;
 			bc.density = 1.0;
 			bc.linearDrag = 10.0;
 			bc.angularDrag = 2.0;
@@ -66,21 +70,26 @@
 			add( new Wall( 500, 140, 400 ) );
 			var fluid:Image = new Image( FOREGROUND );
 			background = new Scenery( new Image( BACKGROUND ), 0, 0 );
-			soup = new Scenery( new Image( SOUP ), 86, 170 );
+			soup = new Scenery( new Image( SOUP ), 86, 290 );
 			( soup.graphic as Image ).alpha = 0.5;
 			foreground = new Scenery( fluid, 0, 0 );
-			
-			selected = new Image( SELECTED );
-			selected.centerOO();
-			selected.smooth = true;
 			
 			world.SetContactFilter( new Collision() );
 		}
 		
 		public function unselect( drop:OilDrop ):void
 		{
+			drop.select = false;
 			if ( drop == select1 || drop == select2 )
 			{
+				if ( select1 != null )
+				{
+					select1.select = false;
+				}
+				if ( select2 != null )
+				{
+					select2.select = false;
+				}
 				select1 = null;
 				select2 = null;
 			}
@@ -92,49 +101,47 @@
             return ( element["join1"] != testdrop && element["join2"] != testdrop );
         }
 
-		
 		override public function render():void
 		{
+			var select:Boolean = false;
+			if ( select1 != null )
+			{
+				select = select1.select;
+				select1.select = false;
+			}
 			background.render();
 			super.render();
 			if ( Input.mouseDown && select1 != null && select2 == null )
 			{
 				Draw.linePlus( select1.x, select1.y, mouseX, mouseY,  0xFFFF0000, 0.5, 3.0 );
-				select1.render();
+				select1.select = select;
 				select1.render();
 			}
 			joinlist.forEach( drawLine );
 			soup.render();
 			foreground.render();
-			if ( Input.mouseDown && select1 != null && select2 == null )
-			{
-				selected.alpha = 0.6;
-				selected.scale = select1.scale;
-				selected.render( new Point( select1.x, select1.y ), new Point() );
-			}
-			joinlist.forEach( drawBall );
+			timer_message.render( new Point( 650,  450 ), new Point() );
+			score_message.render( new Point( 650,  470 ), new Point() );
 		}
 		
 		private function drawLine(element:*, index:int, arr:Array):void
 		{
-			Draw.linePlus( element["join1"].x, element["join1"].y, element["join2"].x, element["join2"].y,  0xFFFF0000, 1.0, 3.0 );
+			Draw.linePlus( element["join1"].x, element["join1"].y, element["join2"].x, element["join2"].y,  0xFFFF0000, 0.8, 3.0 );
+			element["join1"].joined = true;
 			element["join1"].render();
-			element["join1"].render();
+			element["join1"].joined = false;
+			element["join2"].joined = true;
 			element["join2"].render();
-			element["join2"].render();
-		}
-		
-		private function drawBall(element:*, index:int, arr:Array):void
-		{
-			selected.alpha = 1.0;
-			selected.scale = element["join1"].scale;
-			selected.render( new Point( element["join1"].x, element["join1"].y ), new Point() );
-			selected.scale = element["join2"].scale;
-			selected.render( new Point( element["join2"].x, element["join2"].y ), new Point() );
+			element["join2"].joined = false;
 		}
 		
 		override public function update():void
 		{
+			timer -= FP.elapsed;
+			drop_timer += FP.elapsed;
+			timer_message.text = "TIMER: ".concat( Math.ceil( timer ) );
+			score_message.text = "SCORE: ".concat( score );
+			
 			if ( Input.mouseDown )
 			{
 				world.Step( slow, 1, 1 );
@@ -165,18 +172,6 @@
 			if ( next > rate && classCount( OilDrop ) < 50 )
 			{
 				next = 0.0;
-				num += 1;
-				if ( num > total )
-				{
-					num = 0;
-					total += 1;
-					if ( total % 13 == 0 )
-					{
-						var tomato:Tomato = new Tomato( 350 * Math.random() + 125, -80 );
-						add( tomato );
-						// todo: change soup level
-					}
-				}
 				var drop:OilDrop = new OilDrop( 360 * Math.random() + 115, 480,
 												0.1 + 0.05 * Math.random() - 0.05 * Math.random(),
 												Math.round( Math.random() * 2 ) );
@@ -187,6 +182,13 @@
 					bc.density = 15;
 				}
 			}		
+
+			if ( drop_timer >= 30.0 && timer > 29.0 )
+			{
+				drop_timer = 0.0;
+				var tomato:Tomato = new Tomato( 350 * Math.random() + 125, -80 );
+				add( tomato );
+			}
 
 			if ( Input.mousePressed )
 			{
@@ -207,6 +209,7 @@
 					if ( Input.mouseDown && select1 == null )
 					{
 						select1 = hover;
+						select1.select = true;
 					}
 					else if ( Input.mouseReleased )
 					{
@@ -220,10 +223,6 @@
 							select2 = null;
 						}
 					}
-				}
-				else if ( Input.mouseReleased && hover == select1 )
-				{
-					unselect( select1 );
 				}
 			}
 			
@@ -250,10 +249,6 @@
 				}
 			}
 			
-			if ( Input.mouseReleased && select2 == null )
-			{
-				select1 = null;
-			}
 			if ( Input.mouseReleased && select1 != null && select2 != null && select1 != select2 )
 			{
 				if ( ! joinlist.some( pairExists ) )
@@ -261,8 +256,14 @@
 					var pair:Object = { join1: select1, join2: select2 };
 					joinlist.push( pair );
 				}
+				select1.select = false;
 				select1 = null;
 				select2 = null;
+			}
+			if ( Input.mouseReleased && select1 != null )
+			{
+				select1.select = false;
+				select1 = null;
 			}
 
 			world.DrawDebugData();
@@ -309,6 +310,7 @@
 				old2 = drop2;
 				newdrop = new OilDrop( x, y, s, drop1.colour );
 				newdrop.score = ( drop1.score + 1 ) * ( drop2.score + 1 );
+				score += newdrop.score;
 				return false;
 			}
 			else
