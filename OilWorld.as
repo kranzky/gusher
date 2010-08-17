@@ -41,13 +41,14 @@
 		public var newdrop:OilDrop = null;
 		private var timer:Number = 180.0;
 		private var drop_timer:Number = 0.0;
+		private var drop_num:int = 0;
 		private var timer_message:Text;
 		private var score:int = 0;
 		private var score_message:Text;
 		
 		override public function begin():void
 		{		
-			//debug_draw();
+			// debug_draw();
 			
 			timer_message = new Text( "TIMER: 180" );
 			score_message = new Text( "SCORE: 999999" );
@@ -183,10 +184,11 @@
 				}
 			}		
 
-			if ( drop_timer >= 30.0 && timer > 29.0 )
+			if ( drop_timer >= 30.0 && timer > 29.0 && drop_num < 5 )
 			{
 				drop_timer = 0.0;
-				var tomato:Tomato = new Tomato( 350 * Math.random() + 125, -80 );
+				var tomato:Tomato = new Tomato( 290 - 180 * Math.random() + 180 * Math.random(), -80, drop_num );
+				drop_num += 1;
 				add( tomato );
 			}
 
