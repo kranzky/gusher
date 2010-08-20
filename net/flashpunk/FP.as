@@ -22,7 +22,7 @@
 		/**
 		 * The FlashPunk major version.
 		 */
-		public static const VERSION:String = "1.3";
+		public static const VERSION:String = "1.4";
 		
 		/**
 		 * Width of the game.
@@ -91,6 +91,14 @@
 		}
 		
 		/**
+		 * Resets the camera position.
+		 */
+		public static function resetCamera():void
+		{
+			camera.x = camera.y = 0;
+		}
+		
+		/**
 		 * Global volume factor for all sounds, a value from 0 to 1.
 		 */
 		public static function get volume():Number { return _volume; }
@@ -122,8 +130,8 @@
 		 */
 		public static function choose(...objs):*
 		{
-			if (objs.length == 1 && (objs[0] is Array || objs[0] is Vector.<*>)) objs = objs[0];
-			return objs[rand(objs.length)];
+			var c:* = (objs.length == 1 && (objs[0] is Array || objs[0] is Vector.<*>)) ? objs[0] : objs;
+			return c[rand(c.length)];
 		}
 		
 		/**
