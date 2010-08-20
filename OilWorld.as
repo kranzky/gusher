@@ -95,7 +95,7 @@
 				select1.select = false;
 			}
 			background.render();
-			soup.background.render( new Point( soup.x, soup.y ), new Point() );
+			soup.background.render( new Point( soup.x, soup.y - 10 ), new Point() );
 			super.render();
 			if ( Input.mouseDown && select1 != null && select2 == null )
 			{
