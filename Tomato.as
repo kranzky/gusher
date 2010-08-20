@@ -93,21 +93,19 @@
 			
 			if ( ! submerged && ( y + 0.5 * height ) > ( oil_world.soup.y - 10 ) && x > 100 && x < 500 )
 			{
-				oil_world.water.AddBody( body );
+				oil_world.soup.water.AddBody( body );
 				submerged = true;
 			}
 			
 			if ( ! ingredient && y > oil_world.soup.y )
 			{
 				ingredient = true;
-				oil_world.soup.y -= 30;
-				( oil_world.water as b2BuoyancyController ).offset += 1;
-				( oil_world.soup.graphic as Image ).alpha += 0.05;
+				oil_world.soup.addIngredient();
 			}
 			
 			if ( submerged && ( ( y + 0.5 * height ) < ( oil_world.soup.y - 20 ) || x < 100 || x > 500 ) )
 			{
-				oil_world.water.RemoveBody( body );
+				oil_world.soup.water.RemoveBody( body );
 				submerged = false;
 			}
 			

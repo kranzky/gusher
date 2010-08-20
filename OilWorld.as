@@ -9,8 +9,6 @@
 	import net.flashpunk.Tween;
 	import net.flashpunk.tweens.misc.Alarm;
 	import net.flashpunk.graphics.Image;
-	import Box2D.Dynamics.Controllers.b2Controller;
-	import Box2D.Dynamics.Controllers.b2BuoyancyController;
 	import net.flashpunk.utils.Input;
 	import net.flashpunk.utils.Draw;
 	import flash.geom.Point;
@@ -22,12 +20,9 @@
 		private const BACKGROUND:Class;
 		[Embed(source = 'data/foreground.png')]
 		private const FOREGROUND:Class;
-		[Embed(source = 'data/water1.png')]
-		private const SOUP:Class;
 		private var background:Entity;
 		private var foreground:Entity;
-		public var soup:Entity;
-		public var water:b2Controller;
+		public var soup:Stock;
 		private var next:Number = 2.0;
 		private var normal:Number = 1.0 / 30;
 		private var slow:Number = 1.0 / 150;
@@ -43,7 +38,7 @@
 		private var drop_timer:Number = 0.0;
 		private var drop_num:int = 0;
 		private var timer_message:Text;
-		private var score:int = 0;
+		public var score:int = 0;
 		private var score_message:Text;
 		
 		override public function begin():void
@@ -52,15 +47,6 @@
 			
 			timer_message = new Text( "TIMER: 180" );
 			score_message = new Text( "SCORE: 999999" );
-			
-			var bc:b2BuoyancyController = new b2BuoyancyController();
-			water = bc;
-			bc.normal.Set( 0, -1 );
-			bc.offset = -10.5;
-			bc.density = 1.0;
-			bc.linearDrag = 10.0;
-			bc.angularDrag = 2.0;
-			world.AddController( water );
 			
 			var pot:Ground = new Ground( 90, 450, 410 );
 			pot.body.SetUserData("pot");
@@ -71,10 +57,8 @@
 			add( new Wall( 500, 140, 400 ) );
 			var fluid:Image = new Image( FOREGROUND );
 			background = new Scenery( new Image( BACKGROUND ), 0, 0 );
-			soup = new Scenery( new Image( SOUP ), 86, 290 );
-			( soup.graphic as Image ).alpha = 0.5;
+			soup = new Stock( 86, 290 );
 			foreground = new Scenery( fluid, 0, 0 );
-			
 			world.SetContactFilter( new Collision() );
 		}
 		
@@ -111,6 +95,7 @@
 				select1.select = false;
 			}
 			background.render();
+			soup.background.render( new Point( soup.x, soup.y ), new Point() );
 			super.render();
 			if ( Input.mouseDown && select1 != null && select2 == null )
 			{
@@ -163,26 +148,15 @@
 				e.step();
 			}
 
-			var bc:b2BuoyancyController = water as b2BuoyancyController;
-			var rate:Number = 2.0 / ( bc.density * bc.density + 1.0 );
-			if ( rate < 0.01 )
-			{
-				rate = 0.01;
-			}
-
-			if ( next > rate && classCount( OilDrop ) < 50 )
+			if ( next > soup.rate && classCount( OilDrop ) < 50 )
 			{
 				next = 0.0;
 				var drop:OilDrop = new OilDrop( 360 * Math.random() + 115, 480,
 												0.1 + 0.05 * Math.random() - 0.05 * Math.random(),
 												Math.round( Math.random() * 2 ) );
 				add( drop );
-				bc.density += 0.05;
-				if ( bc.density > 15 )
-				{
-					bc.density = 15;
-				}
-			}		
+				soup.increaseHeat();
+			}
 
 			if ( drop_timer >= 30.0 && timer > 29.0 && drop_num < 5 )
 			{
@@ -243,12 +217,7 @@
 				old1 = null;
 				old2 = null;
 				newdrop = null;
-				bc = water as b2BuoyancyController;
-				bc.density = bc.density * (500.0/(bc.density*bc.density+499.0));
-				if ( bc.density < 1.0 )
-				{
-					bc.density = 1.0;
-				}
+				soup.reduceHeat();
 			}
 			
 			if ( Input.mouseReleased && select1 != null && select2 != null && select1 != select2 )
@@ -270,6 +239,7 @@
 
 			world.DrawDebugData();
 			super.update();
+			soup.update();
 		}
 		private function pairExists( element:*, index:int, arr:Array ):Boolean
 		{
@@ -312,7 +282,6 @@
 				old2 = drop2;
 				newdrop = new OilDrop( x, y, s, drop1.colour );
 				newdrop.score = ( drop1.score + 1 ) * ( drop2.score + 1 );
-				score += newdrop.score;
 				return false;
 			}
 			else

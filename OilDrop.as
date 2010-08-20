@@ -70,22 +70,22 @@
 		}
 		override public function render():void
 		{
-			if ( joined )
+			if ( select || joined )
 			{
-				Draw.circle( x, y, 157 * scale + 3, 0xFFFF0000, 0.8 );
-			}
-			else if ( select )
-			{
-				Draw.circle( x, y, 157 * scale + 3, 0xFFFF0000, 0.5 );
-			}
-			if ( hover || select || joined )
-			{
-				Draw.circle( x, y, 157 * scale, 0xFFFFFFFF, 1.0 );
+				Draw.circlePlus( x, y, 157 * scale, 0xFFFFFFFF );
 			}
 			super.render();
 			if ( hover )
 			{
-				Draw.circle( x, y, 157 * scale, 0xFFFFFFFF, 0.3 );
+				Draw.circlePlus( x, y, 157 * scale, 0xFFFFFFFF, 0.3 );
+			}
+			if ( joined )
+			{
+				Draw.circlePlus( x, y, 160 * scale, 0xFFFF0000, 0.8, false, 3 );
+			}
+			else if ( select )
+			{
+				Draw.circlePlus( x, y, 160 * scale, 0xFFFF0000, 0.5, false, 3 );
 			}
 		}
 		override public function step():void
@@ -108,7 +108,7 @@
 			{
 				if ( body != null )
 				{
-					oil_world.water.AddBody( body );
+					oil_world.soup.water.AddBody( body );
 				}
 				submerged = true;
 			}
@@ -117,7 +117,7 @@
 			{
 				if ( body != null )
 				{
-					oil_world.water.RemoveBody( body );
+					oil_world.soup.water.RemoveBody( body );
 				}
 				submerged = false;
 			}
@@ -146,6 +146,7 @@
 				if ( score > 0 )
 				{
 					oil_world.add( new Score( x, y - 0.4 * height, score ) );
+					oil_world.score += score;
 				}
 			}
 			
