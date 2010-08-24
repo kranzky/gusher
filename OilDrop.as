@@ -122,17 +122,22 @@
 				submerged = false;
 			}
 			
-			if ( graphic == poplet || age > 50 || y < 0 || y > 600 || x < 0 || x > 800 )
+			if ( graphic == poplet )
 			{
 				oil_world.unselect( this );
 				if ( body != null )
 				{
 					oil_world.world.DestroyBody( body );
 				}
+				if ( score > 0 )
+				{
+					oil_world.add( new Score( x, y - 0.4 * height, score ) );
+					oil_world.score += score;
+				}
 				FP.world.remove( this );
 			}
 			
-			if ( scale > 0.5 )
+			if ( scale > 0.5 || y < 10 || y > 590 || x < 10 || x > 790 )
 			{
 				age = 49;
 			}
@@ -143,11 +148,6 @@
 				oil_world.world.DestroyBody(body);
 				body = null;
 				submerged = false;
-				if ( score > 0 )
-				{
-					oil_world.add( new Score( x, y - 0.4 * height, score ) );
-					oil_world.score += score;
-				}
 			}
 			
 			if ( hover )
