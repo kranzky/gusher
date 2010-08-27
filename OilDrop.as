@@ -26,22 +26,23 @@
 		private var poplet:Image;
 		private var submerged:Boolean = false;
 		private var age:int = 0;
-		public var colour:int = 0;
+		public var colour:uint = 0xFFFF0000;
 		public var scale:Number = 1.0;
 		public var hover:Boolean = false;
 		public var select:Boolean = false;
 		public var joined:Boolean = false;
 		public var score:int = 0;
 
-		public function OilDrop( x:int = 0, y:int = 0, scale:Number = 0.1, colour:Number = 0 ) 
+		public function OilDrop( x:int = 0, y:int = 0, scale:Number = 0.1, colour:uint = 0xFFFF0000 ) 
 		{
+			var oil_world:OilWorld = FP.world as OilWorld;
 			this.colour = colour;
 			this.scale = scale;
-			if ( colour == 0 )
+			if ( colour == oil_world.COLOUR[0] )
 			{
 				droplet = new Image( DROPLET_BLUE );
 			}
-			else if ( colour == 1 )
+			else if ( colour == oil_world.COLOUR[1] )
 			{
 				droplet = new Image( DROPLET_GREEN );
 			}
@@ -81,11 +82,11 @@
 			}
 			if ( joined )
 			{
-				Draw.circlePlus( x, y, 160 * scale, 0xFFFF0000, 0.8, false, 3 );
+				Draw.circlePlus( x, y, 160 * scale, colour, 0.8, false, 3 );
 			}
 			else if ( select )
 			{
-				Draw.circlePlus( x, y, 160 * scale, 0xFFFF0000, 0.5, false, 3 );
+				Draw.circlePlus( x, y, 160 * scale, colour, 0.5, false, 3 );
 			}
 		}
 		override public function step():void

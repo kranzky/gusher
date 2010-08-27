@@ -27,8 +27,8 @@
 		private var normal:Number = 1.0 / 30;
 		private var slow:Number = 1.0 / 150;
 		private var hover:OilDrop = null;
-		public var select1:OilDrop = null;
-		public var select2:OilDrop = null;
+		private var select1:OilDrop = null;
+		private var select2:OilDrop = null;
 		private var joinlist:Array = new Array();
 		private var testdrop:OilDrop = null;
 		public var old1:OilDrop = null;
@@ -40,6 +40,7 @@
 		private var timer_message:Text;
 		public var score:int = 0;
 		private var score_message:Text;
+		public const COLOUR:Array = [ 0xFF0000FF, 0xFF00AA00, 0xFFFF0000 ];
 		
 		override public function begin():void
 		{		
@@ -99,7 +100,7 @@
 			super.render();
 			if ( Input.mouseDown && select1 != null && select2 == null )
 			{
-				Draw.linePlus( select1.x, select1.y, mouseX, mouseY,  0xFFFF0000, 0.5, 3.0 );
+				Draw.linePlus( select1.x, select1.y, mouseX, mouseY, select1.colour, 0.5, 3.0 );
 				select1.select = select;
 				select1.render();
 			}
@@ -112,11 +113,19 @@
 		
 		private function drawLine(element:*, index:int, arr:Array):void
 		{
-			Draw.linePlus( element["join1"].x, element["join1"].y, element["join2"].x, element["join2"].y,  0xFFFF0000, 0.8, 3.0 );
-			element["join1"].joined = true;
+			var attract:Boolean = element["attract"];
+			var alpha:Number = 0.5;
+			if ( attract )
+			{
+				alpha = 0.8;
+			}
+			Draw.linePlus( element["join1"].x, element["join1"].y, element["join2"].x, element["join2"].y,  element["join1"].colour, alpha, 3.0 );
+			element["join1"].joined = attract;
+			element["join1"].select = ! attract;
 			element["join1"].render();
 			element["join1"].joined = false;
-			element["join2"].joined = true;
+			element["join2"].joined = attract;
+			element["join2"].select = ! attract;
 			element["join2"].render();
 			element["join2"].joined = false;
 		}
@@ -153,7 +162,7 @@
 				next = 0.0;
 				var drop:OilDrop = new OilDrop( 360 * Math.random() + 115, 480,
 												0.1 + 0.05 * Math.random() - 0.05 * Math.random(),
-												Math.round( Math.random() * 2 ) );
+												COLOUR[Math.round( Math.random() * 2 )] );
 				add( drop );
 				soup.increaseHeat();
 			}
@@ -195,10 +204,19 @@
 						}
 						else
 						{
+							select1.select = false;
 							select1 = null;
 							select2 = null;
 						}
 					}
+					else if ( select2 == null && select1 != null && select1.colour == hover.colour )
+					{
+						select2 = hover;
+					}
+				}
+				else if ( Input.mouseReleased && select1 == hover )
+				{
+					// unselect( select1 );
 				}
 			}
 			
@@ -220,21 +238,27 @@
 				soup.reduceHeat();
 			}
 			
-			if ( Input.mouseReleased && select1 != null && select2 != null && select1 != select2 )
+			if ( select1 != null && select2 != null && select1 != select2 )
 			{
 				if ( ! joinlist.some( pairExists ) )
 				{
-					var pair:Object = { join1: select1, join2: select2 };
+					var pair:Object = { join1: select1, join2: select2, attract: false };
 					joinlist.push( pair );
 				}
 				select1.select = false;
-				select1 = null;
+				select1 = select2;
+				select1.select = true;
 				select2 = null;
 			}
-			if ( Input.mouseReleased && select1 != null )
+
+			if ( Input.mouseReleased  )
 			{
-				select1.select = false;
-				select1 = null;
+				if ( select1 != null )
+				{
+					select1.select = false;
+					select1 = null;
+				}
+				joinlist.forEach( startAttracting );
 			}
 
 			world.DrawDebugData();
@@ -255,7 +279,8 @@
 		{
 			var drop1:OilDrop = element["join1"];
 			var drop2:OilDrop = element["join2"];
-			if ( drop1.body == null || drop2.body == null )
+			var attract:Boolean = element["attract"];
+			if ( drop1.body == null || drop2.body == null || ! attract )
 			{
 				return true;
 			}
@@ -310,6 +335,10 @@
 				element["join2"] = newdrop;
 			}
 			return element;
+		}
+		private function startAttracting(element:*, index:int, arr:Array):void
+		{
+			element["attract"] = true;
 		}
 	}
 }
