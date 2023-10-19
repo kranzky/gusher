@@ -1,0 +1,15 @@
+CACHE MANIFEST
+
+# GusherII v001
+
+NETWORK:
+*
+
+CACHE:
+index.html
+offline.html
+404.html
+Gusher.swf
+
+FALLBACK:
+/ offline.html

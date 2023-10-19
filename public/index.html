@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" manifest="manifest.appcache">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <title>Gusher II</title>
+  </head>
+  
+  <body style="background-color: black; border: 0; padding: 0; margin: 0;">
+    <div style="border: 0; padding: 0; margin: 0 auto; width: 800px; height: 600px; position: relative;">
+      <div id="container" style="border: 0; padding: 0; margin: 0 auto; width: 800px; height: 600px;"></div>
+      <button title="Enter fullscreen" style="border: 0; padding: 0; margin: 0; width: 32px; height: 32px; position: absolute; right: 4px; top: 564px; opacity: 0.5;" onclick="openFullscreen();">
+        <img src="https://itch.io/static/images/enlarge.svg?1697668828" style="width: 32px; height: 32px;">
+      </button>
+    </div>
+    <script>
+      window.RufflePlayer = window.RufflePlayer || {};
+      window.RufflePlayer.config = {
+        "autoplay": "on",
+        "splashScreen": false,
+        "unmuteOverlay": false,
+        "backgroundColor": "#000000"
+      };
+      window.addEventListener("load", (event) => {
+        const ruffle = window.RufflePlayer.newest();
+        const player = ruffle.createPlayer();
+        const container = document.getElementById("container");
+        container.appendChild(player);
+        player.load("Gusher2.swf");
+        player.style.width = "100%";
+        player.style.height = "100%";
+      });
+      function openFullscreen() {
+        var elem = document.getElementById("container");
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) { /* Safari */
+          elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { /* IE11 */
+          elem.msRequestFullscreen();
+        }
+      }
+    </script>
+    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+  </body>
+</html>
